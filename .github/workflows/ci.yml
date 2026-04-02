@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - run: npm ci
+      
+      - run: npm run lint
+        working-directory: studio
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - run: npm ci
+      - run: npm test
+        working-directory: studio
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - run: npm ci
+      - run: npm run build
+        working-directory: studio
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build Docker image
+        run: |
+          docker build \
+            --tag studio:${{ github.sha }} \
+            --tag studio:latest \
+            .
+          
+      - name: Run health check
+        run: |
+          docker run -d --name studio-test studio:${{ github.sha }}
+          sleep 5
+          docker exec studio-test wget -qO- http://localhost:3000/health || exit 1
+          docker stop studio-test
+
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [lint, test, build, docker]
+    if: always()
+    steps:
+      - name: Check all jobs passed
+        run: |
+          if [[ "${{ needs.lint.result }}" != "success" ]]; then exit 1; fi
+          if [[ "${{ needs.test.result }}" != "success" ]]; then exit 1; fi
+          if [[ "${{ needs.build.result }}" != "success" ]]; then exit 1; fi
+          if [[ "${{ needs.docker.result }}" != "success" ]]; then exit 1; fi

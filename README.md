@@ -2,207 +2,144 @@
 
 > Your AI development team. From idea to production — with professional quality.
 
-[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-blue.svg)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-20 LTS-green)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20%20LTS-green)](https://nodejs.org/)
+[![GitHub Stars](https://img.shields.io/github/stars/kexing6400/studio)](https://github.com/kexing6400/studio/stargazers)
 
-## Overview
+## ⚡ What is Studio?
 
-Studio is an AI-native development studio built on the 三省六部 (Three Departments and Six Ministries) architecture. It transforms natural language ideas into production-quality software through autonomous multi-agent collaboration.
+Studio is an **AI-native development studio** that transforms natural language ideas into production-quality software through autonomous multi-agent collaboration.
 
-### What Makes Studio Different
-
-| Aspect | Typical AI Code Tools | Studio |
-|--------|----------------------|--------|
-| Code Quality | Demo/Prototype | Production-ready |
-| Project Structure | Single files | Full monorepo |
-| Testing | None or minimal | ≥80% coverage |
-| DevOps | Manual | Full CI/CD |
-| Security | Often overlooked | Secret scanning + hardening |
-
-## System Architecture
+**You say what you want. Studio builds it.**
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                          User Input                            │
-│                   (Natural Language Brief)                      │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     三省六部 Orchestration                       │
-│                                                                 │
-│   ┌─────────┐                                                   │
-│   │  太子    │  Triage — Analyze intent, classify task type     │
-│   └────┬────┘                                                   │
-│   ┌────▼────┐                                                   │
-│   │ 中书省   │  Plan — Architecture design, PRD generation      │
-│   └────┬────┘                                                   │
-│   ┌────▼────┐                                                   │
-│   │ 门下省   │  Review — Security, scalability, risk audit      │
-│   └────┬────┘                                                   │
-│   ┌────▼────┐                                                   │
-│   │ 尚书省   │  Dispatch — Task allocation, progress tracking   │
-│   └────┬────┘                                                   │
-│   ┌────▼────┐                                                   │
-│   │ 六部    │  Execute — Parallel implementation                │
-│   │ 工部    │    Backend (Express/FastAPI)                      │
-│   │ 户部    │    Database design + DevOps                       │
-│   │ 礼部    │    Frontend (Next.js/React)                       │
-│   │ 刑部    │    Testing + QA                                   │
-│   │ 兵部    │    Infrastructure + CI/CD                         │
-│   │ 吏部    │    Documentation + Human review                    │
-│   └─────────┘                                                   │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Production Output                            │
-│  • SPEC.md (architecture document)                              │
-│  • Full-stack application code                                  │
-│  • Docker + docker-compose                                     │
-│  • GitHub Actions CI/CD                                        │
-│  • Complete documentation                                       │
-└─────────────────────────────────────────────────────────────────┘
+💭 "Build a task management API with JWT auth"
+   ↓
+📋 三省六部 plans the architecture
+   ↓
+🏭 Six ministries implement in parallel
+   ↓
+✅ Production-ready code with tests, CI/CD, docs
 ```
 
-## Quick Start
+## 🎯 Why Studio?
 
-### Prerequisites
+| What you want | What you get |
+|---------------|--------------|
+| "Build an API" | Express + TypeScript + Prisma + tests |
+| "Add auth" | JWT + refresh tokens + rate limiting |
+| "Deploy it" | Docker + GitHub Actions + health checks |
 
-- Node.js 20 LTS
-- Python 3.12+
-- Docker + docker-compose
-- Git
+**No more:**
+- ❌ Demo code that breaks in production
+- ❌ Missing error handling
+- ❌ No tests, no docs, no CI/CD
+- ❌ Reinventing the wheel every project
 
-### Installation
+## 🏛️ How It Works: 三省六部 Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        You (Natural Language)               │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│   太子 (Crown Prince) — Triage                              │
+│   "Is this a quick answer or a real project?"               │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│   中书省 (Secretariat) — Planning                           │
+│   "What should we build? Architecture, tech stack, structure"│
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│   门下省 (Department of Review) — Approval                 │
+│   "Is this secure? Scalable? Worth building?"               │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│   尚书省 (Department of Cabinet) — Dispatch                │
+│   "Six ministries, start your engines"                     │
+└─────────────────────────────────────────────────────────────┘
+                              │
+            ┌─────────────────┼─────────────────┐
+            ▼                 ▼                 ▼
+     ┌──────────┐     ┌──────────┐     ┌──────────┐
+     │   工部   │     │   户部   │     │   礼部   │
+     │ Backend  │     │ DevOps   │     │Frontend  │
+     └──────────┘     └──────────┘     └──────────┘
+            │                 │                 │
+            └─────────────────┼─────────────────┘
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│   ✅ Production-Ready Output                               │
+│   • TypeScript strict mode                                 │
+│   • ≥80% test coverage                                     │
+│   • Docker + docker-compose                                │
+│   • GitHub Actions CI/CD                                   │
+│   • Complete documentation                                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 🚀 Quick Start
 
 ```bash
 # Clone the repository
 git clone https://github.com/kexing6400/studio.git
 cd studio
 
-# Install dependencies
-npm install
-
 # Start the dashboard
-npm run dashboard
-```
-
-### Dashboard
-
-The dashboard provides a web UI for monitoring and controlling the 三省六部 system:
-
-```bash
-cd dashboard
 npm install
-npm run dev
+npm run dashboard
+
+# Open http://localhost:7891
 ```
 
-Access at `http://localhost:7891`
+## 📦 What You Get
 
-## Project Structure
-
-```
-studio/
-├── SPEC.md                    # This specification
-├── README.md                  # Project documentation
-│
-├── studio/                    # Core AI orchestration
-│   ├── agents/                # Agent definitions
-│   │   ├── taizi/            # Crown Prince (triage)
-│   │   ├── zhongshu/         # Secretariat (planning)
-│   │   ├── menxia/           # Department of门下 (review)
-│   │   ├── shangshu/         # Department of尚书 (dispatch)
-│   │   └── libu/             # Ministry of礼 (frontend)
-│   │       └── ...
-│   ├── scripts/              # Execution scripts
-│   └── lib/                   # Shared utilities
-│
-├── dashboard/                 # Web dashboard
-│   ├── app/                   # Next.js app
-│   ├── components/           # React components
-│   └── dist/                  # Built static assets
-│
-└── projects/                 # Generated projects (gitignored)
-```
-
-## Output Standards
-
-Every project generated by Studio meets these standards:
+Every project generated by Studio meets **professional standards**:
 
 ### Backend
-- ✅ TypeScript strict mode (no `any` escape hatches)
-- ✅ ESLint + Prettier enforcement
-- ✅ REST API with OpenAPI 3.1 spec
-- ✅ PostgreSQL + Prisma ORM with migrations
-- ✅ JWT authentication with refresh tokens
-- ✅ Rate limiting, CORS, security headers
-- ✅ Structured JSON logging
-- ✅ Graceful shutdown
+- ✅ TypeScript strict mode (no `any`)
+- ✅ Express.js / FastAPI
+- ✅ PostgreSQL + Prisma ORM
+- ✅ JWT authentication
+- ✅ Rate limiting + security headers
+- ✅ Structured logging
 - ✅ ≥80% test coverage
 
 ### Frontend
-- ✅ Next.js 14 App Router
-- ✅ TypeScript strict mode
+- ✅ Next.js 14
+- ✅ TypeScript strict
 - ✅ Tailwind CSS
-- ✅ React Query for server state
-- ✅ Zod for runtime validation
-- ✅ Accessibility: WCAG 2.1 AA
-- ✅ Playwright E2E tests
+- ✅ Accessible (WCAG 2.1)
 
 ### DevOps
+- ✅ Docker multi-stage builds
+- ✅ docker-compose
 - ✅ GitHub Actions CI/CD
-- ✅ Multi-stage Dockerfile
-- ✅ docker-compose for local dev
-- ✅ Environment validation
-- ✅ Secret scanning in CI
+- ✅ Health checks
 
-## Generated Project Template
+## 📚 Documentation
 
-When Studio creates a new project, it produces:
+- [SPEC.md](./SPEC.md) — Full system specification
+- [LOOP_FRAMEWORK.md](./docs/LOOP_FRAMEWORK.md) — 7×24 autonomous operation
+- [projects/taskmaster-api](./projects/taskmaster-api/) — Example generated project
 
-```
-project-name/
-├── SPEC.md                    # Architecture & design decisions
-├── README.md                  # Quick start guide
-├── CONTRIBUTING.md            # Contribution guidelines
-├── CHANGELOG.md               # Version history
-│
-├── packages/
-│   ├── backend/               # Express/Fastify API
-│   │   ├── src/
-│   │   │   ├── routes/
-│   │   │   ├── middleware/
-│   │   │   ├── services/
-│   │   │   └── types/
-│   │   ├── tests/
-│   │   ├── prisma/
-│   │   │   └── migrations/
-│   │   ├── Dockerfile
-│   │   └── package.json
-│   │
-│   └── frontend/              # Next.js application
-│       ├── src/
-│       │   ├── app/
-│       │   ├── components/
-│       │   └── lib/
-│       ├── tests/
-│       └── package.json
-│
-├── docker-compose.yml         # Full stack local dev
-├── .env.example               # Environment template
-├── .eslintrc.js               # Linting config
-├── turbo.json                 # Monorepo config
-└── package.json               # Workspace root
-```
+## 🤝 Contributing
 
-## License
+Contributions welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-Proprietary — Studio system source code.
+## 📄 License
 
-Generated projects are owned by their creators under licenses of their choosing.
+MIT License — see [LICENSE](./LICENSE).
 
 ---
 
-*Built with 三省六部 — Where AI meets production quality.*
+**Built with 三省六部 — Where AI meets production quality.**

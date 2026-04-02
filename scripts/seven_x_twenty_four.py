@@ -545,9 +545,20 @@ def run_compliance_check(state: LoopState) -> LoopState:
             for line in jiandu_result.stdout.strip().split('\n')[-10:]:
                 if line.strip():
                     log(f'  {line}')
+            
+            # 吏部Agent权重检查
+            optimizer_result = subprocess.run(
+                ['python3', f'{EDICT_HOME}/scripts/optimizer.py', '--review'],
+                capture_output=True, text=True, timeout=15,
+                cwd=EDICT_HOME
+            )
+            for line in optimizer_result.stdout.strip().split('\n')[-10:]:
+                if line.strip():
+                    log(f'  {line}')
+            
             state.last_jiandu = now_iso()
         except Exception as e:
-            log(f'  监察院审查异常: {e}', 'WARN')
+            log(f'  监察院/吏部审查异常: {e}', 'WARN')
     
     state.last_compliance = now_iso()
     return state

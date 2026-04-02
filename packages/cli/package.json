@@ -1,0 +1,26 @@
+{
+  "name": "@studio/cli",
+  "version": "0.1.0",
+  "description": "Studio CLI - Create production-ready projects with AI",
+  "type": "module",
+  "bin": {
+    "studio": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "cli",
+    "boilerplate",
+    "template",
+    "typescript",
+    "express",
+    "nextjs",
+    "production"
+  ]
+}

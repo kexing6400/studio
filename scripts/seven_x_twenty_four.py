@@ -96,6 +96,7 @@ class LoopState:
     last_promotion: Optional[str] = None
     last_summary: Optional[str] = None
     last_compliance: Optional[str] = None
+    last_jiandu: Optional[str] = None
     last_daily_date: Optional[str] = None
     consecutive_errors: int = 0
     total_cycles: int = 0
@@ -421,10 +422,10 @@ def run_quality_check(state: LoopState) -> LoopState:
     return state
 
 def run_compliance_check(state: LoopState) -> LoopState:
-    """合规检查：红线约束检查"""
+    """合规检查：红线约束检查 + 监察院随机抽查"""
     log('=== 合规检查 ===')
     
-    # 运行合规检查器
+    # 1. 运行合规检查器
     try:
         result = subprocess.run(
             ['python3', f'{EDICT_HOME}/scripts/compliance_checker.py', '--report'],
@@ -439,7 +440,6 @@ def run_compliance_check(state: LoopState) -> LoopState:
         # 检查违规日志
         violation_log = pathlib.Path('/tmp/studio_redline_violations.log')
         if violation_log.exists():
-            # 检查最近1小时内是否有新违规
             recent = subprocess.run(
                 ['tail', '-1', str(violation_log)],
                 capture_output=True, text=True, timeout=5
@@ -454,6 +454,22 @@ def run_compliance_check(state: LoopState) -> LoopState:
     except Exception as e:
         log(f'  合规检查执行异常: {e}', 'WARN')
     
+    # 2. 监察院随机抽查 (每2小时一次)
+    if should_run(state, 7200, 'last_jiandu'):
+        log('=== 监察院随机抽查 ===')
+        try:
+            jiandu_result = subprocess.run(
+                ['python3', f'{EDICT_HOME}/scripts/jiandu_review.py', '--random-check'],
+                capture_output=True, text=True, timeout=30,
+                cwd=EDICT_HOME
+            )
+            for line in jiandu_result.stdout.strip().split('\n')[-5:]:
+                if line.strip():
+                    log(f'  {line}')
+            state.last_jiandu = now_iso()
+        except Exception as e:
+            log(f'  监察院抽查异常: {e}', 'WARN')
+    
     state.last_compliance = now_iso()
     return state
 
@@ -467,9 +483,66 @@ def run_promotion(state: LoopState) -> LoopState:
     elif hour == 20:
         log('=== 晚间总结 (20:00) ===')
         _generate_evening_report()
+        # 晚间时检查是否需要推广
+        _check_promotion_opportunity(state)
     
     state.last_promotion = now_iso()
     return state
+
+def _jiandu_review(action: str, agent: str, details: dict) -> bool:
+    """监察院审查 - 返回True表示通过"""
+    try:
+        result = subprocess.run(
+            ['python3', f'{EDICT_HOME}/scripts/jiandu_review.py',
+             '--action', action, '--agent', agent,
+             '--details', json.dumps(details)],
+            capture_output=True, text=True, timeout=15,
+            cwd=EDICT_HOME
+        )
+        
+        if result.returncode != 0:
+            log(f'  🔴 监察院拒绝: {action}', 'ERROR')
+            return False
+        
+        log(f'  ✅ 监察院放行: {action}')
+        return True
+    except Exception as e:
+        log(f'  ⚠️ 监察院审查异常: {e}', 'WARN')
+        return True  # 异常时放行（后续可调整）
+
+def _check_promotion_opportunity(state: LoopState):
+    """检查是否有推广机会 (需要监察院审查)"""
+    # 获取当前GitHub Stars
+    studio = github_api('GET', '/repos/kexing6400/studio')
+    if studio:
+        stars = studio.get('stargazers_count', 0)
+        log(f'  当前Stars: ⭐{stars}')
+        
+        if stars < 100:
+            # 准备推广，但需要监察院审查
+            log('  准备推广...')
+            
+            # 检查推广频率
+            compliance_state = load_state()
+            today = datetime.now().strftime('%Y-%m-%d')
+            promo_count = compliance_state.promotion_daily_count.get(today, 0)
+            
+            if promo_count < 2:
+                # 监察院审查
+                details = {
+                    'action': 'promote',
+                    'url': 'https://github.com/kexing6400/studio',
+                    'text': 'Studio: AI-Powered Independent Developer Studio - Transform natural language ideas into production-quality software with multi-agent collaboration',
+                    'channel': 'github_daily'
+                }
+                
+                if _jiandu_review('promote', 'shangshu', details):
+                    log('  ✅ 监察院审查通过，可以推广')
+                    # TODO: 执行实际推广操作
+                else:
+                    log('  🔴 监察院拒绝本次推广')
+            else:
+                log(f'  ⏸ 今日推广次数已达上限 ({promo_count}/2)')
 
 def _generate_morning_report():
     """生成早间简报"""

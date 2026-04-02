@@ -532,21 +532,22 @@ def run_compliance_check(state: LoopState) -> LoopState:
     except Exception as e:
         log(f'  合规检查执行异常: {e}', 'WARN')
     
-    # 2. 监察院随机抽查 (每2小时一次)
+    # 2. 监察院高压审查 (每2小时一次)
     if should_run(state, 7200, 'last_jiandu'):
-        log('=== 监察院随机抽查 ===')
+        log('=== 监察院高压审查 ===')
         try:
+            # 仓库质量巡检
             jiandu_result = subprocess.run(
-                ['python3', f'{EDICT_HOME}/scripts/jiandu_review.py', '--random-check'],
+                ['python3', f'{EDICT_HOME}/scripts/jiandu_review.py', '--daily-review'],
                 capture_output=True, text=True, timeout=30,
                 cwd=EDICT_HOME
             )
-            for line in jiandu_result.stdout.strip().split('\n')[-5:]:
+            for line in jiandu_result.stdout.strip().split('\n')[-10:]:
                 if line.strip():
                     log(f'  {line}')
             state.last_jiandu = now_iso()
         except Exception as e:
-            log(f'  监察院抽查异常: {e}', 'WARN')
+            log(f'  监察院审查异常: {e}', 'WARN')
     
     state.last_compliance = now_iso()
     return state

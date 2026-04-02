@@ -95,6 +95,7 @@ class LoopState:
     last_quality: Optional[str] = None
     last_promotion: Optional[str] = None
     last_summary: Optional[str] = None
+    last_compliance: Optional[str] = None
     last_daily_date: Optional[str] = None
     consecutive_errors: int = 0
     total_cycles: int = 0
@@ -419,6 +420,43 @@ def run_quality_check(state: LoopState) -> LoopState:
     state.last_quality = now_iso()
     return state
 
+def run_compliance_check(state: LoopState) -> LoopState:
+    """合规检查：红线约束检查"""
+    log('=== 合规检查 ===')
+    
+    # 运行合规检查器
+    try:
+        result = subprocess.run(
+            ['python3', f'{EDICT_HOME}/scripts/compliance_checker.py', '--report'],
+            capture_output=True, text=True, timeout=10,
+            cwd=EDICT_HOME
+        )
+        if result.stdout:
+            for line in result.stdout.strip().split('\n')[-10:]:  # 只显示最后10行
+                if line.strip():
+                    log(f'  {line}')
+        
+        # 检查违规日志
+        violation_log = pathlib.Path('/tmp/studio_redline_violations.log')
+        if violation_log.exists():
+            # 检查最近1小时内是否有新违规
+            recent = subprocess.run(
+                ['tail', '-1', str(violation_log)],
+                capture_output=True, text=True, timeout=5
+            )
+            if recent.stdout:
+                import json
+                try:
+                    entry = json.loads(recent.stdout.strip())
+                    log(f'  🚨 最近违规: {entry.get("red_line", "unknown")}', 'WARN')
+                except:
+                    pass
+    except Exception as e:
+        log(f'  合规检查执行异常: {e}', 'WARN')
+    
+    state.last_compliance = now_iso()
+    return state
+
 def run_promotion(state: LoopState) -> LoopState:
     """推广报告：早间/晚间"""
     hour = datetime.now().hour
@@ -569,6 +607,10 @@ def run_cycle(state: LoopState) -> LoopState:
         # 质量检查 (每15分钟)
         if should_run(state, QUALITY_INTERVAL, 'last_quality'):
             state = run_quality_check(state)
+        
+        # 合规检查 (每小时)
+        if should_run(state, 3600, 'last_compliance'):
+            state = run_compliance_check(state)
         
         # 推广报告 (每天 08:00 / 20:00)
         hour = datetime.now().hour
